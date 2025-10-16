@@ -28,7 +28,7 @@ export default function ProductsPage() {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const { toast } = useToast()
-  const { products, loading, currentPage, limit } = useAppSelector((state) => state.products)
+  const { products, loading, currentPage, limit, total } = useAppSelector((state) => state.products)
   const { categories } = useAppSelector((state) => state.categories)
 
   const [searchQuery, setSearchQuery] = useState("")
@@ -83,10 +83,7 @@ export default function ProductsPage() {
     setDeleteDialogOpen(true)
   }
 
-  const totalPages = Math.ceil(products.length / limit)
-  const startIndex = (currentPage - 1) * limit
-  const endIndex = startIndex + limit
-  const paginatedProducts = products.slice(startIndex, endIndex)
+  const totalPages = Math.ceil(total / limit)
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -142,12 +139,12 @@ export default function ProductsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {paginatedProducts.length === 0 ? (
+            {products.length === 0 ? (
               <div className="col-span-full text-center">
                 <p className="text-muted-foreground">No products found</p>
               </div>
             ) : (
-              paginatedProducts.map((product) => (
+              products.map((product) => (
                 <ProductCard key={product.id} product={product} onDelete={openDeleteDialog} />
               ))
             )}
@@ -155,10 +152,10 @@ export default function ProductsPage() {
         )}
 
         {/* Pagination */}
-        {!loading && paginatedProducts.length > 0 && (
+        {!loading && products.length > 0 && (
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              Showing {startIndex + 1} to {Math.min(endIndex, products.length)} of {products.length} results
+              Page {currentPage} of {totalPages}
             </p>
             <div className="flex gap-2">
               <Button
@@ -168,7 +165,7 @@ export default function ProductsPage() {
               >
                 Previous
               </Button>
-              {Array.from({ length: Math.min(3, totalPages) }, (_, i) => i + 1).map((page) => (
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                 <Button
                   key={page}
                   variant={currentPage === page ? "default" : "outline"}

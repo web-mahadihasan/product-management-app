@@ -17,7 +17,7 @@ export function ProductCard({ product, onDelete }: ProductCardProps) {
 
   return (
     <Card
-      className="group relative flex cursor-pointer flex-col overflow-hidden rounded-lg shadow-sm transition-shadow duration-300 hover:shadow-[0px_10px_20px_rgba(0,0,0,0.1)]"
+      className="group relative p-0 flex cursor-pointer flex-col overflow-hidden rounded-lg shadow-sm transition-shadow duration-300 hover:shadow-[rgba(99, 99, 99, 0.2) 0px 2px 8px 0px]"
       onClick={() => router.push(`/products/${product.slug}`)}
     >
       <div className="relative h-[200px]">

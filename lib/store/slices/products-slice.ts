@@ -9,7 +9,7 @@ const initialState: ProductsState = {
   error: null,
   total: 0,
   currentPage: 1,
-  limit: 12,
+  limit: 8,
 }
 
 export const fetchProducts = createAsyncThunk(
@@ -71,8 +71,10 @@ const productsSlice = createSlice({
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false
-        state.products = action.payload
         state.total = action.payload.length
+        const startIndex = (state.currentPage - 1) * state.limit
+        const endIndex = startIndex + state.limit
+        state.products = action.payload.slice(startIndex, endIndex)
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false
