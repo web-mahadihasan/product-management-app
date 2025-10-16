@@ -9,7 +9,7 @@ const initialState: ProductsState = {
   error: null,
   total: 0,
   currentPage: 1,
-  limit: 10,
+  limit: 12,
 }
 
 export const fetchProducts = createAsyncThunk(
