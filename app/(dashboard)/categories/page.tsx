@@ -43,12 +43,12 @@ export default function CategoriesPage() {
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {categories.map((category) => (
-              <Card key={category.id} className="overflow-hidden transition-shadow hover:shadow-md">
-                <div className="aspect-video overflow-hidden bg-muted">
+              <Card key={category.id} className="overflow-hidden transition-shadow hover:shadow-md flex flex-row p-2">
+                <div className="aspect-video overflow-hidden bg-muted">                   
                   <img
                     src={category.image || "/placeholder.svg?height=200&width=300"}
                     alt={category.name}
-                    className="h-full w-full object-cover"
+                    className="h-[80px] w-[100px] object-cover rounded-lg                                                                                                                                                                                                                                                                                                       "
                   />
                 </div>
                 <CardContent className="p-4">
