@@ -22,7 +22,7 @@ export function ProductCard({ product, onDelete }: ProductCardProps) {
     >
       <div className="relative h-[200px]">
         <img
-          src={product.images[0] || "/placeholder.svg?height=200&width=200"}
+          src={product.images?.[0] || "/placeholder.svg?height=200&width=200"}
           alt={product.name}
           className="h-full w-full object-cover"
         />
