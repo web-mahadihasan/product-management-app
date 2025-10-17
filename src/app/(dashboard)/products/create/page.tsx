@@ -19,7 +19,8 @@ import { fetchCategories } from "@/lib/store/slices/categories-slice"
 import { productSchema } from "@/lib/validations/product"
 import { z } from "zod"
 
-import FileUpload, { DropZone, FileError, FileList, FileInfo } from "@/components/ui/file-upload";
+import FileUpload, { DropZone, FileError, FileInfo } from "@/components/ui/file-upload";
+import { Trash } from "lucide-react";
 
 export default function CreateProductPage() {
   const router = useRouter()
@@ -37,22 +38,42 @@ export default function CreateProductPage() {
   const [uploadFiles, setUploadFiles] = useState<FileInfo[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
+  const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
     dispatch(fetchCategories())
   }, [dispatch])
 
-  const onFileSelectChange = (files: FileInfo[]) => {
-    setUploadFiles(files)
-    const newImages = files.map(file => URL.createObjectURL(file.file));
-    setFormData(prev => ({ ...prev, images: newImages }));
+  const handleImageUpload = async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file)
+    formData.append("upload_preset", "fitVerse")
+    setUploading(true)
+    try {
+      const response = await fetch(`https://api.cloudinary.com/v1_1/dcnpqmlqd/image/upload`, {
+        method: "POST",
+        body: formData
+      })
+      const data = await response.json();
+      console.log("image", data)
+      setFormData(prev => ({ ...prev, images: [data.url] }));
+      setUploading(false)
+    } catch (error) { 
+      console.log(error)
+      setUploading(false)
+    }
   }
 
-  const onRemove = (fileId: string) => {
-    const newFiles = uploadFiles.filter(file => file.id !== fileId);
-    setUploadFiles(newFiles);
-    const newImages = newFiles.map(file => URL.createObjectURL(file.file));
-    setFormData(prev => ({ ...prev, images: newImages }));
+  const onFileSelectChange = (files: FileInfo[]) => {
+    setUploadFiles(files)
+    if (files.length > 0) {
+      handleImageUpload(files[0].file)
+    }
+  }
+
+  const onRemove = () => {
+    setUploadFiles([]);
+    setFormData(prev => ({ ...prev, images: [] }));
   }
 
   const validate = () => {
@@ -82,30 +103,39 @@ export default function CreateProductPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    const payload = {
+      name: formData.name,
+      description: formData.description,
+      price: Number.parseFloat(formData.price),
+      categoryId: formData.categoryId,
+      images: formData.images,
+    }
+    console.log(payload)
+
     if (!validate()) {
       toast.error("Please fix the errors in the form")
       return
     }
 
-    setLoading(true)
-    try {
-      await dispatch(
-        createProduct({
-          name: formData.name,
-          description: formData.description,
-          price: Number.parseFloat(formData.price),
-          categoryId: formData.categoryId,
-          images: formData.images,
-        }),
-      ).unwrap()
+    // setLoading(true)
+    // try {
+    //   await dispatch(
+    //     createProduct({
+    //       name: formData.name,
+    //       description: formData.description,
+    //       price: Number.parseFloat(formData.price),
+    //       categoryId: formData.categoryId,
+    //       images: formData.images,
+    //     }),
+    //   ).unwrap()
 
-      toast.success("Product created successfully")
-      router.push("/products")
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to create product")
-    } finally {
-      setLoading(false)
-    }
+    //   toast.success("Product created successfully")
+    //   router.push("/products")
+    // } catch (error) {
+    //   toast.error(error instanceof Error ? error.message : "Failed to create product")
+    // } finally {
+    //   setLoading(false)
+    // }
   }
 
   return (
@@ -140,6 +170,7 @@ export default function CreateProductPage() {
                   }}
                   placeholder="Enter product name"
                   aria-invalid={!!errors.name}
+                  className="focus-visible:ring-0 focus-visible:ring-offset-0"
                 />
                 {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
               </div>
@@ -158,6 +189,7 @@ export default function CreateProductPage() {
                   placeholder="Enter product description"
                   rows={4}
                   aria-invalid={!!errors.description}
+                  className="focus-visible:ring-0 focus-visible:ring-offset-0"
                 />
                 {errors.description && <p className="text-sm text-destructive">{errors.description}</p>}
               </div>
@@ -178,6 +210,7 @@ export default function CreateProductPage() {
                     }}
                     placeholder="0.00"
                     aria-invalid={!!errors.price}
+                    className="focus-visible:ring-0 focus-visible:ring-offset-0"
                   />
                   {errors.price && <p className="text-sm text-destructive">{errors.price}</p>}
                 </div>
@@ -195,14 +228,14 @@ export default function CreateProductPage() {
                     disabled={categoriesLoading}
                   >
                     <SelectTrigger 
-                      className="w-full" 
+                      className="w-full cursor-pointer focus:ring-0 focus:ring-offset-0" 
                       aria-invalid={!!errors.categoryId}
                     >
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
                       {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
+                        <SelectItem key={category.id} value={category.id} className="cursor-pointer py-2">
                           {category.name}
                         </SelectItem>
                       ))}
@@ -216,33 +249,38 @@ export default function CreateProductPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="image">
-                  Image <span className="text-destructive">*</span>
+                  Image <span className="text-destructive mb-2">*</span>
                 </Label>
-                <FileUpload
-                  files={uploadFiles}
-                  onFileSelectChange={onFileSelectChange}
-                  multiple={true}
-                  accept=".png,.jpg,.jpeg"
-                  maxSize={10}
-                  maxCount={3}
-                  className="mt-2"
-                  disabled={loading}
-                >
-                  <div className="space-y-4">
-                    <DropZone prompt="click or drop, 3 file to upload" />
-                    <FileError />
-                    <FileList onClear={() => setUploadFiles([])} onRemove={onRemove} canResume={true}/>
+                {formData.images.length > 0 ? (
+                  <div className="relative mt-2 w-fit">
+                    <img src={formData.images[0]} alt="Product image" width={250} height={150} className="rounded-md" />
+                    <Button variant="destructive" size="icon" className="absolute top-0 right-0 h-7 w-7" onClick={onRemove}>
+                      <Trash className="h-4 w-4" />
+                    </Button>
                   </div>
-                </FileUpload>
+                ) : (
+                  <FileUpload
+                    files={uploadFiles}
+                    onFileSelectChange={onFileSelectChange}
+                    multiple={false}
+                    accept=".png,.jpg,.jpeg"
+                    maxSize={10}
+                    maxCount={1}
+                    className="mt-2"
+                    disabled={loading || uploading}
+                  >
+                    <div className="space-y-4">
+                      <DropZone prompt={uploading ? "Uploading image..." : "click or drop to upload file"} />
+                      <FileError />
+                    </div>
+                  </FileUpload>
+                )}
                 {errors.images && <p className="text-sm text-destructive">{errors.images}</p>}
               </div>
 
               <div className="flex gap-4">
-                <Button type="submit" disabled={loading} className="flex-1">
-                  {loading ? "Creating..." : "Create Product"}
-                </Button>
-                <Button type="button" variant="outline" onClick={() => router.back()}>
-                  Cancel
+                <Button type="submit" disabled={loading || uploading} className="flex-1">
+                  {loading ? "Creating Product..." :"Create Product"}
                 </Button>
               </div>
             </form>
