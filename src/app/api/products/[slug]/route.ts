@@ -87,7 +87,7 @@ export async function PUT(request: NextRequest, { params }: { params: { slug: st
 
 // DELETE a product
 export async function DELETE(request: NextRequest, { params }: { params: { slug: string } }) {
-  const { slug } = params
+  const { slug: productId } = params // The slug is the product ID in this context
 
   try {
     const token = request.headers.get('authorization')
@@ -95,20 +95,6 @@ export async function DELETE(request: NextRequest, { params }: { params: { slug:
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
 
-    // First, get the product by slug to find its ID
-    const productResponse = await fetch(`${API_BASE_URL}/products/${slug}`, {
-      headers: {
-        Authorization: token,
-      },
-    })
-
-    if (!productResponse.ok) {
-      return NextResponse.json({ message: "Product not found to delete" }, { status: 404 })
-    }
-    const product = await productResponse.json()
-    const productId = product.id
-
-    // Now, delete the product using the retrieved ID
     const response = await fetch(`${API_BASE_URL}/products/${productId}`, {
       method: 'DELETE',
       headers: {
@@ -118,15 +104,12 @@ export async function DELETE(request: NextRequest, { params }: { params: { slug:
 
     if (!response.ok) {
       const errorData = await response.json()
-      return NextResponse.json({ message: 'Failed to delete product', error: errorData }, { status: response.status })
+      return NextResponse.json({ message: "Failed to delete product", error: errorData }, { status: response.status })
     }
 
-    // Revalidate caches
     revalidateTag('products')
-    revalidateTag(`product-${slug}`)
-
-    return NextResponse.json({ message: 'Product deleted successfully' }, { status: 200 })
+    return NextResponse.json({ message: "Product deleted successfully" }, { status: 200 })
   } catch (error) {
-    return NextResponse.json({ message: 'An unknown error occurred', error }, { status: 500 })
+    return NextResponse.json({ message: "An unknown error occurred", error }, { status: 500 })
   }
 }

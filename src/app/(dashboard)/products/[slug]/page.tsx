@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -16,41 +16,47 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { useAppDispatch, useAppSelector } from "@/lib/store/hooks"
-import { fetchProductBySlug, clearCurrentProduct, deleteProduct } from "@/lib/store/slices/products-slice"
-import { toast } from 'react-hot-toast';
+import { toast } from "react-hot-toast"
 import { ProductDetailSkeleton } from "@/components/products/product-skeleton"
+import { useAppQuery } from "@/hooks/use-app-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import type { Product } from "@/lib/types"
+import axiosInstance from "@/lib/axios"
 
 export default function ProductDetailPage() {
   const router = useRouter()
   const params = useParams()
-  const dispatch = useAppDispatch()
-  
-  const { currentProduct, loading } = useAppSelector((state) => state.products)
+  const queryClient = useQueryClient()
+  const slug = params.slug as string
+
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
-  useEffect(() => {
-    if (params.slug) {
-      dispatch(fetchProductBySlug(params.slug as string))
-    }
-    return () => {
-      dispatch(clearCurrentProduct())
-    }
-  }, [dispatch, params.slug])
+  const { data: currentProduct, isLoading, isError } = useAppQuery<Product>({
+    url: `/products/${slug}`,
+    queryKey: ["product", slug],
+  })
 
-  const handleDelete = async () => {
-    if (!currentProduct) return
-
-    try {
-      await dispatch(deleteProduct(currentProduct.id)).unwrap()
+  const { mutate: deleteProduct, isPending: isDeleting } = useMutation({
+    mutationFn: (id: string) => {
+      return axiosInstance.delete(`/products/${id}`)
+    },
+    onSuccess: () => {
       toast.success("Product deleted successfully")
+      setDeleteDialogOpen(false)
+      queryClient.invalidateQueries({ queryKey: ["products"] })
       router.push("/products")
-    } catch (error) {
+    },
+    onError: () => {
       toast.error("Failed to delete product")
-    }
+    },
+  })
+
+  const handleDelete = () => {
+    if (!currentProduct) return
+    deleteProduct(currentProduct.id)
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background p-6">
         <div className="mx-auto max-w-5xl">
@@ -60,7 +66,7 @@ export default function ProductDetailPage() {
     )
   }
 
-  if (!currentProduct) {
+  if (isError || !currentProduct) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <p className="text-muted-foreground">Product not found</p>
@@ -162,13 +168,14 @@ export default function ProductDetailPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <Button
               onClick={handleDelete}
+              disabled={isDeleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
-            </AlertDialogAction>
+              {isDeleting ? "Deleting..." : "Delete"}
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

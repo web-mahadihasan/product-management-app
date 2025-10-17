@@ -17,10 +17,10 @@ export function ProductCard({ product, onDelete }: ProductCardProps) {
 
   return (
     <Card
-      className="group relative p-0 flex cursor-pointer flex-col overflow-hidden rounded-lg shadow-sm transition-shadow duration-300 hover:shadow-[rgba(99, 99, 99, 0.2) 0px 2px 8px 0px]"
+      className="group relative p-0 flex cursor-pointer flex-col overflow-hidden rounded-lg shadow-sm transition-shadow duration-300 hover:shadow-[rgba(99, 99, 99, 0.2) 0px 2px 8px 0px] gap-0"
       onClick={() => router.push(`/products/${product.slug}`)}
     >
-      <div className="relative h-[200px]">
+      <div className="relative h-[200px] border-b border-gray-200">
         <img
           src={product.images?.[0] || "/placeholder.svg?height=200&width=200"}
           alt={product.name}
@@ -51,7 +51,7 @@ export function ProductCard({ product, onDelete }: ProductCardProps) {
           </Button>
         </div>
       </div>
-      <CardContent className="flex-1 p-4">
+      <CardContent className="flex-1 p-4 mt-0">
         <CardTitle className="mb-2 line-clamp-2 text-base font-semibold">{product.name}</CardTitle>
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">Category</span>
