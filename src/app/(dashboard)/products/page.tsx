@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Plus, Search, Filter } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -16,60 +16,64 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { useAppDispatch, useAppSelector } from "@/lib/store/hooks"
-import { fetchProducts, searchProducts, deleteProduct, setCurrentPage } from "@/lib/store/slices/products-slice"
-import { fetchCategories } from "@/lib/store/slices/categories-slice"
-import { toast } from 'react-hot-toast';
-import type { Product } from "@/lib/types"
+import { useAppQuery } from "@/hooks/use-app-query"
+import { toast } from "react-hot-toast"
+import type { Product, Category } from "@/lib/types"
 import { ProductCard } from "@/components/products/product-card"
 import { ProductCardSkeleton } from "@/components/products/product-skeleton"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import axiosInstance from "@/lib/axios"
 
 export default function ProductsPage() {
   const router = useRouter()
-  const dispatch = useAppDispatch()
-  
-  const { products, loading, currentPage, limit, total } = useAppSelector((state) => state.products)
-  const { categories } = useAppSelector((state) => state.categories)
+  const queryClient = useQueryClient()
 
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState<string>("all")
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [productToDelete, setProductToDelete] = useState<Product | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const limit = 8
 
-  useEffect(() => {
-    dispatch(fetchCategories())
-  }, [dispatch])
+  // Fetch Categories
+  const { data: categoriesData } = useAppQuery<{ categories: Category[] }>({
+    url: "/categories",
+    queryKey: ["categories"],
+  })
+  const categories = categoriesData?.categories || []
 
-  useEffect(() => {
-    if (searchQuery) {
-      const debounce = setTimeout(() => {
-        dispatch(searchProducts(searchQuery))
-      }, 300)
-      return () => clearTimeout(debounce)
-    } else {
-      const offset = (currentPage - 1) * limit
-      dispatch(
-        fetchProducts({
-          offset,
-          limit,
-          ...(selectedCategory !== "all" && { categoryId: selectedCategory }),
-        }),
-      )
-    }
-  }, [dispatch, searchQuery, currentPage, limit, selectedCategory])
+  // Fetch Products
+  const {
+    data: productsData,
+    isLoading: productsLoading,
+    isError: productsError,
+  } = useAppQuery<{ products: Product[]; total: number }>({
+    url: searchQuery
+      ? `/products/search?searchedText=${searchQuery}`
+      : `/products?offset=${(currentPage - 1) * limit}&limit=${limit}${
+          selectedCategory !== "all" ? `&categoryId=${selectedCategory}` : ""
+        }`,
+    queryKey: ["products", { currentPage, limit, selectedCategory, searchQuery }],
+  })
 
-  const handleDelete = async () => {
-    if (!productToDelete) return
+  const products = productsData?.products || []
+  const total = productsData?.total || 0
 
-    try {
-      await dispatch(deleteProduct(productToDelete.id)).unwrap()
+  // Delete Product Mutation
+  const { mutate: deleteProduct, isPending: isDeleting } = useMutation({
+    mutationFn: (id: string) => {
+      return axiosInstance.delete(`/products/${id}`)
+    },
+    onSuccess: () => {
       toast.success("Product deleted successfully")
       setDeleteDialogOpen(false)
       setProductToDelete(null)
-    } catch (error) {
+      queryClient.invalidateQueries({ queryKey: ["products"] })
+    },
+    onError: () => {
       toast.error("Failed to delete product")
-    }
-  }
+    },
+  })
 
   const openDeleteDialog = (product: Product) => {
     setProductToDelete(product)
@@ -100,11 +104,20 @@ export default function ProductsPage() {
             <Input
               placeholder="Search products..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value)
+                setCurrentPage(1) // Reset to first page on search
+              }}
               className="pl-9"
             />
           </div>
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+          <Select
+            value={selectedCategory}
+            onValueChange={(value) => {
+              setSelectedCategory(value)
+              setCurrentPage(1) // Reset to first page on category change
+            }}
+          >
             <SelectTrigger className="w-full sm:w-[200px]">
               <SelectValue placeholder="All Categories" />
             </SelectTrigger>
@@ -124,11 +137,15 @@ export default function ProductsPage() {
         </div>
 
         {/* Product Grid */}
-        {loading ? (
+        {productsLoading ? (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {Array.from({ length: limit }).map((_, index) => (
               <ProductCardSkeleton key={index} />
             ))}
+          </div>
+        ) : productsError ? (
+          <div className="col-span-full text-center">
+            <p className="text-destructive">Failed to load products.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -145,7 +162,7 @@ export default function ProductsPage() {
         )}
 
         {/* Pagination */}
-        {!loading && products.length > 0 && (
+        {!productsLoading && products.length > 0 && (
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
               Page {currentPage} of {totalPages}
@@ -153,7 +170,7 @@ export default function ProductsPage() {
             <div className="flex gap-2">
               <Button
                 variant="outline"
-                onClick={() => dispatch(setCurrentPage(currentPage - 1))}
+                onClick={() => setCurrentPage(currentPage - 1)}
                 disabled={currentPage === 1}
               >
                 Previous
@@ -162,14 +179,14 @@ export default function ProductsPage() {
                 <Button
                   key={page}
                   variant={currentPage === page ? "default" : "outline"}
-                  onClick={() => dispatch(setCurrentPage(page))}
+                  onClick={() => setCurrentPage(page)}
                 >
                   {page}
                 </Button>
               ))}
               <Button
                 variant="outline"
-                onClick={() => dispatch(setCurrentPage(currentPage + 1))}
+                onClick={() => setCurrentPage(currentPage + 1)}
                 disabled={currentPage >= totalPages}
               >
                 Next
@@ -191,10 +208,15 @@ export default function ProductsPage() {
           <AlertDialogFooter>
             <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDelete}
+              onClick={() => {
+                if (productToDelete) {
+                  deleteProduct(productToDelete.id)
+                }
+              }}
+              disabled={isDeleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
+              {isDeleting ? "Deleting..." : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

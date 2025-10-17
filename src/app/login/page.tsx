@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Package } from "lucide-react"
@@ -9,20 +8,37 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAppDispatch } from "@/lib/store/hooks"
-import { login } from "@/lib/store/slices/auth-slice"
-import { toast } from 'react-hot-toast';
+import { setAuth } from "@/lib/store/slices/auth-slice"
+import { toast } from "react-hot-toast"
 import { loginSchema } from "@/lib/validations/auth"
 import { z } from "zod"
+import { useAppMutation } from "@/hooks/use-app-mutation"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
   const dispatch = useAppDispatch()
-  
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const { mutate: login, isPending: loading } = useAppMutation<
+    { token: string },
+    any,
+    { email: string }
+  >({
+    url: "/auth/login",
+    onSuccess: (data) => {
+      dispatch(setAuth({ token: data.token, email }))
+      toast.success("Logged in successfully")
+      router.push("/dashboard")
+    },
+    onError: (error: any) => {
+      const errorMessage = error.response?.data?.message || "Failed to login. Please try with valid email."
+      setError(errorMessage)
+      toast.error(errorMessage)
+    },
+  })
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
 
@@ -36,19 +52,7 @@ export default function LoginPage() {
         return
       }
     }
-
-    setLoading(true)
-    try {
-      await dispatch(login(email)).unwrap()
-      toast.success("Logged in successfully")
-      router.push("/dashboard")
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to login. Please try with valid email."
-      setError(errorMessage)
-      toast.error(errorMessage)
-    } finally {
-      setLoading(false)
-    }
+    login({ email })
   }
 
   return (

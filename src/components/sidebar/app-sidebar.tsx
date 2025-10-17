@@ -48,7 +48,7 @@ const SidebarBody = ({ collapsed, setCollapsed, setMobileSidebarOpen, handleLogo
     </div>
 
     {/* Navigation */}
-    <nav className="flex-1 space-y-1 p-2">
+    <nav className="flex-1 space-y-2 p-2">
       {navigation.map((item) => {
         const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
         return (

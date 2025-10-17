@@ -6,6 +6,7 @@ import "./globals.css"
 import { ReduxProvider } from "@/components/providers/redux-provider"
 import { AuthProvider } from "@/components/providers/auth-provider"
 import { ThemeProvider } from "@/components/providers/theme-provider"
+import QueryProvider from "@/components/providers/query-provider"
 import { Toaster } from 'react-hot-toast';
 
 const _geist = Geist({ subsets: ["latin"] })
@@ -27,7 +28,9 @@ export default function RootLayout({
       <body className={`font-sans antialiased`}>
         <ThemeProvider defaultTheme="light">
           <ReduxProvider>
-            <AuthProvider>{children}</AuthProvider>
+            <QueryProvider>
+              <AuthProvider>{children}</AuthProvider>
+            </QueryProvider>
           </ReduxProvider>
         </ThemeProvider>
         <Toaster />

@@ -1,26 +1,30 @@
 "use client"
 
-import { useEffect } from "react"
 import { Package, Tag, DollarSign, TrendingUp, AlertTriangle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useAppDispatch, useAppSelector } from "@/lib/store/hooks"
-import { fetchProducts } from "@/lib/store/slices/products-slice"
-import { fetchCategories } from "@/lib/store/slices/categories-slice"
+import { useAppQuery } from "@/hooks/use-app-query"
+import type { Product, Category } from "@/lib/types"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function DashboardPage() {
-  const dispatch = useAppDispatch()
-  const { products } = useAppSelector((state) => state.products)
-  const { categories } = useAppSelector((state) => state.categories)
+  const { data: productsData, isLoading: productsLoading } = useAppQuery<{ products: Product[]; total: number }>({
+    url: "/products",
+    queryKey: ["products"],
+  })
 
-  useEffect(() => {
-    dispatch(fetchProducts())
-    dispatch(fetchCategories())
-  }, [dispatch])
+  const { data: categoriesData, isLoading: categoriesLoading } = useAppQuery<{ categories: Category[] }>({
+    url: "/categories",
+    queryKey: ["categories"],
+  })
 
-  const totalProducts = products.length
+  const products = productsData?.products || []
+  const totalProducts = productsData?.total || 0
+  const categories = categoriesData?.categories || []
   const totalCategories = categories.length
   const lowStockCount = 23 // Mock data
   const totalValue = products.reduce((sum, p) => sum + p.price, 0) / 1000
+
+  const isLoading = productsLoading || categoriesLoading
 
   const stats = [
     {
@@ -60,6 +64,33 @@ export default function DashboardPage() {
       trend: "up",
     },
   ]
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background p-6">
+        <div className="mx-auto max-w-7xl space-y-6">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Product Management</h1>
+            <p className="text-muted-foreground">Manage your product inventory and details</p>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <Card key={index}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-8 w-8 rounded-lg" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-6 w-16" />
+                  <Skeleton className="mt-2 h-3 w-32" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background p-6">

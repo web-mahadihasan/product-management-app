@@ -1,10 +1,9 @@
 "use client"
 
-import { useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
-import { useAppDispatch, useAppSelector } from "@/lib/store/hooks"
-import { fetchCategories } from "@/lib/store/slices/categories-slice"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useAppQuery } from "@/hooks/use-app-query"
+import type { Category } from "@/lib/types"
 
 function CategorySkeleton() {
   return (
@@ -19,12 +18,12 @@ function CategorySkeleton() {
 }
 
 export default function CategoriesPage() {
-  const dispatch = useAppDispatch()
-  const { categories, loading } = useAppSelector((state) => state.categories)
+  const { data: categoriesData, isLoading } = useAppQuery<{ categories: Category[] }>({
+    url: "/categories",
+    queryKey: ["categories"],
+  })
 
-  useEffect(() => {
-    dispatch(fetchCategories())
-  }, [dispatch])
+  const categories = categoriesData?.categories || []
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -34,7 +33,7 @@ export default function CategoriesPage() {
           <p className="text-muted-foreground">Browse product categories</p>
         </div>
 
-        {loading ? (
+        {isLoading ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
               <CategorySkeleton key={i} />
@@ -44,11 +43,11 @@ export default function CategoriesPage() {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {categories.map((category) => (
               <Card key={category.id} className="overflow-hidden transition-shadow hover:shadow-md flex flex-row p-2">
-                <div className="aspect-video overflow-hidden bg-muted">                   
+                <div className="aspect-video overflow-hidden bg-muted">
                   <img
                     src={category.image || "/placeholder.svg?height=200&width=300"}
                     alt={category.name}
-                    className="h-[80px] w-[100px] object-cover rounded-lg                                                                                                                                                                                                                                                                                                       "
+                    className="h-[80px] w-[100px] object-cover rounded-lg"
                   />
                 </div>
                 <CardContent className="p-4">

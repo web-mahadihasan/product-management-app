@@ -19,7 +19,8 @@ A modern, full-stack product management dashboard built with Next.js, TypeScript
 
 - **Framework**: Next.js 15 (App Router)
 - **Language**: TypeScript
-- **State Management**: Redux Toolkit
+- **State Management**: Redux Toolkit & TanStack React Query
+- **Data Fetching**: Axios & TanStack React Query
 - **Styling**: Tailwind CSS v4
 - **UI Components**: shadcn/ui
 - **Form Validation**: Zod
@@ -78,24 +79,26 @@ npm run dev
 
 ## API Endpoints
 
-The app connects to the BiTechX API:
+The application uses a Backend-for-Frontend (BFF) pattern. The frontend communicates with Next.js API routes, which then call the external BiTechX API. This provides a layer of abstraction and security.
 
-- **Auth**: `POST /auth` - Get JWT token
-- **Products**: 
-  - `GET /products` - List all products
-  - `GET /products/:slug` - Get single product
-  - `POST /products` - Create product
-  - `PUT /products/:id` - Update product
-  - `DELETE /products/:id` - Delete product
-  - `GET /products/search?searchedText=query` - Search products
-- **Categories**:
-  - `GET /categories` - List all categories
-  - `GET /categories/search?searchedText=query` - Search categories
+- **Internal API Routes (`/api/...`)**:
+  - `POST /api/auth/login`
+  - `GET, POST /api/products`
+  - `GET, PUT, DELETE /api/products/:slug`
+  - `GET /api/products/search`
+  - `GET /api/categories`
+  - `GET /api/categories/search`
+
+- **External BiTechX API**: The internal routes proxy requests to the corresponding endpoints on `https://api.bitechx.com`.
 
 ## Project Structure
 
-\`\`\`
+```
 ├── app/
+│   ├── api/                # BFF API Routes (proxy to external API)
+│   │   ├── auth/
+│   │   ├── products/
+│   │   └── categories/
 │   ├── (auth)/
 │   │   └── login/          # Login page
 │   ├── (dashboard)/
@@ -108,16 +111,20 @@ The app connects to the BiTechX API:
 │   ├── not-found.tsx       # 404 page
 │   └── global-error.tsx    # Global error handler
 ├── components/
+│   ├── providers/          # Context providers (Theme, Redux, Query)
 │   ├── sidebar/            # Sidebar components
 │   ├── products/           # Product-specific components
 │   └── ui/                 # shadcn/ui components
+├── hooks/
+│   ├── use-app-query.ts    # Custom hook for useQuery
+│   └── use-app-mutation.ts # Custom hook for useMutation
 ├── lib/
-│   ├── api.ts              # API client functions
+│   ├── axios.ts            # Axios instance for client-side fetching
 │   ├── types.ts            # TypeScript types
 │   ├── validations/        # Zod schemas
 │   └── store/              # Redux store and slices
 └── README.md
-\`\`\`
+```
 
 ## Validation Rules
 
