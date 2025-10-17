@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks"
 import { updateProduct, fetchProductBySlug } from "@/lib/store/slices/products-slice"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from 'react-hot-toast';
 import { productUpdateSchema } from "@/lib/validations/product"
 import { z } from "zod"
 import { Skeleton } from "@/components/ui/skeleton"

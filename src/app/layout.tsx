@@ -6,7 +6,7 @@ import "./globals.css"
 import { ReduxProvider } from "@/components/providers/redux-provider"
 import { AuthProvider } from "@/components/providers/auth-provider"
 import { ThemeProvider } from "@/components/providers/theme-provider"
-import { Toaster } from "@/components/ui/toaster"
+import { Toaster } from 'react-hot-toast';
 
 const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })

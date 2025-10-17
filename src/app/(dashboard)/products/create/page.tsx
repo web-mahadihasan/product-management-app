@@ -13,16 +13,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks"
 import { createProduct } from "@/lib/store/slices/products-slice"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from 'react-hot-toast';
 import { useEffect } from "react"
 import { fetchCategories } from "@/lib/store/slices/categories-slice"
 import { productSchema } from "@/lib/validations/product"
 import { z } from "zod"
 
+import FileUpload, { DropZone, FileError, FileList, FileInfo } from "@/components/ui/file-upload";
+
 export default function CreateProductPage() {
   const router = useRouter()
   const dispatch = useAppDispatch()
-  const { toast } = useToast()
+  
   const { categories, loading: categoriesLoading } = useAppSelector((state) => state.categories)
 
   const [formData, setFormData] = useState({
@@ -30,14 +32,28 @@ export default function CreateProductPage() {
     description: "",
     price: "",
     categoryId: "",
-    images: [""],
+    images: [] as string[],
   })
+  const [uploadFiles, setUploadFiles] = useState<FileInfo[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     dispatch(fetchCategories())
   }, [dispatch])
+
+  const onFileSelectChange = (files: FileInfo[]) => {
+    setUploadFiles(files)
+    const newImages = files.map(file => URL.createObjectURL(file.file));
+    setFormData(prev => ({ ...prev, images: newImages }));
+  }
+
+  const onRemove = (fileId: string) => {
+    const newFiles = uploadFiles.filter(file => file.id !== fileId);
+    setUploadFiles(newFiles);
+    const newImages = newFiles.map(file => URL.createObjectURL(file.file));
+    setFormData(prev => ({ ...prev, images: newImages }));
+  }
 
   const validate = () => {
     try {
@@ -46,7 +62,7 @@ export default function CreateProductPage() {
         description: formData.description,
         price: Number.parseFloat(formData.price),
         categoryId: formData.categoryId,
-        images: formData.images.filter((img) => img.trim()),
+        images: formData.images,
       })
       setErrors({})
       return true
@@ -67,11 +83,7 @@ export default function CreateProductPage() {
     e.preventDefault()
 
     if (!validate()) {
-      toast({
-        title: "Validation Error",
-        description: "Please fix the errors in the form",
-        variant: "destructive",
-      })
+      toast.error("Please fix the errors in the form")
       return
     }
 
@@ -83,21 +95,14 @@ export default function CreateProductPage() {
           description: formData.description,
           price: Number.parseFloat(formData.price),
           categoryId: formData.categoryId,
-          images: formData.images.filter((img) => img.trim()),
+          images: formData.images,
         }),
       ).unwrap()
 
-      toast({
-        title: "Success",
-        description: "Product created successfully",
-      })
+      toast.success("Product created successfully")
       router.push("/products")
     } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create product",
-        variant: "destructive",
-      })
+      toast.error(error instanceof Error ? error.message : "Failed to create product")
     } finally {
       setLoading(false)
     }
@@ -177,7 +182,7 @@ export default function CreateProductPage() {
                   {errors.price && <p className="text-sm text-destructive">{errors.price}</p>}
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 w-full">
                   <Label htmlFor="category">
                     Category <span className="text-destructive">*</span>
                   </Label>
@@ -189,7 +194,10 @@ export default function CreateProductPage() {
                     }}
                     disabled={categoriesLoading}
                   >
-                    <SelectTrigger aria-invalid={!!errors.categoryId}>
+                    <SelectTrigger 
+                      className="w-full" 
+                      aria-invalid={!!errors.categoryId}
+                    >
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
@@ -200,25 +208,33 @@ export default function CreateProductPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  {errors.categoryId && <p className="text-sm text-destructive">{errors.categoryId}</p>}
+                  {errors.categoryId && (
+                    <p className="text-sm text-destructive">{errors.categoryId}</p>
+                  )}
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="image">
-                  Image URL <span className="text-destructive">*</span>
+                  Image <span className="text-destructive">*</span>
                 </Label>
-                <Input
-                  id="image"
-                  value={formData.images[0]}
-                  onChange={(e) => {
-                    setFormData({ ...formData, images: [e.target.value] })
-                    setErrors({ ...errors, "images.0": "" })
-                  }}
-                  placeholder="https://example.com/image.jpg"
-                  aria-invalid={!!errors["images.0"]}
-                />
-                {errors["images.0"] && <p className="text-sm text-destructive">{errors["images.0"]}</p>}
+                <FileUpload
+                  files={uploadFiles}
+                  onFileSelectChange={onFileSelectChange}
+                  multiple={true}
+                  accept=".png,.jpg,.jpeg"
+                  maxSize={10}
+                  maxCount={3}
+                  className="mt-2"
+                  disabled={loading}
+                >
+                  <div className="space-y-4">
+                    <DropZone prompt="click or drop, 3 file to upload" />
+                    <FileError />
+                    <FileList onClear={() => setUploadFiles([])} onRemove={onRemove} canResume={true}/>
+                  </div>
+                </FileUpload>
+                {errors.images && <p className="text-sm text-destructive">{errors.images}</p>}
               </div>
 
               <div className="flex gap-4">

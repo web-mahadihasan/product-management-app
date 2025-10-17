@@ -19,7 +19,7 @@ import {
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks"
 import { fetchProducts, searchProducts, deleteProduct, setCurrentPage } from "@/lib/store/slices/products-slice"
 import { fetchCategories } from "@/lib/store/slices/categories-slice"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from 'react-hot-toast';
 import type { Product } from "@/lib/types"
 import { ProductCard } from "@/components/products/product-card"
 import { ProductCardSkeleton } from "@/components/products/product-skeleton"
@@ -27,7 +27,7 @@ import { ProductCardSkeleton } from "@/components/products/product-skeleton"
 export default function ProductsPage() {
   const router = useRouter()
   const dispatch = useAppDispatch()
-  const { toast } = useToast()
+  
   const { products, loading, currentPage, limit, total } = useAppSelector((state) => state.products)
   const { categories } = useAppSelector((state) => state.categories)
 
@@ -63,18 +63,11 @@ export default function ProductsPage() {
 
     try {
       await dispatch(deleteProduct(productToDelete.id)).unwrap()
-      toast({
-        title: "Success",
-        description: "Product deleted successfully",
-      })
+      toast.success("Product deleted successfully")
       setDeleteDialogOpen(false)
       setProductToDelete(null)
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete product",
-        variant: "destructive",
-      })
+      toast.error("Failed to delete product")
     }
   }
 

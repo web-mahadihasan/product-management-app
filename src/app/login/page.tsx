@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAppDispatch } from "@/lib/store/hooks"
 import { login } from "@/lib/store/slices/auth-slice"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from 'react-hot-toast';
 import { loginSchema } from "@/lib/validations/auth"
 import { z } from "zod"
 
@@ -20,7 +20,7 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const router = useRouter()
   const dispatch = useAppDispatch()
-  const { toast } = useToast()
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -32,11 +32,7 @@ export default function LoginPage() {
       if (err instanceof z.ZodError) {
         const errorMessage = err.errors[0]?.message || "Invalid email"
         setError(errorMessage)
-        toast({
-          title: "Validation Error",
-          description: errorMessage,
-          variant: "destructive",
-        })
+        toast.error(errorMessage)
         return
       }
     }
@@ -44,19 +40,12 @@ export default function LoginPage() {
     setLoading(true)
     try {
       await dispatch(login(email)).unwrap()
-      toast({
-        title: "Success",
-        description: "Logged in successfully",
-      })
+      toast.success("Logged in successfully")
       router.push("/dashboard")
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to login. Please check your email."
+      const errorMessage = error instanceof Error ? error.message : "Failed to login. Please try with valid email."
       setError(errorMessage)
-      toast({
-        title: "Authentication Failed",
-        description: errorMessage,
-        variant: "destructive",
-      })
+      toast.error(errorMessage)
     } finally {
       setLoading(false)
     }
