@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     const response = await fetch(`${API_BASE_URL}/categories/search?searchedText=${encodeURIComponent(searchedText)}`, {
       headers,
       next: {
-        revalidate: 300, // Revalidate every 5 minutes for search queries
+        revalidate: 300,
       },
     })
 

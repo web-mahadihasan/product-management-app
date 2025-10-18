@@ -1,5 +1,4 @@
 "use client"
-import { CloseIcon } from "@/assets/svgIcons"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { useIsLargeScreen } from "@/hooks/use-is-large-screen"

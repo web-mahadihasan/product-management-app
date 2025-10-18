@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     const response = await fetch(`${API_BASE_URL}/products?${query.toString()}`, {
       headers,
       next: {
-        revalidate: 600, // Revalidate every 10 minutes
+        revalidate: 600,
         tags: ['products'],
       },
     })
@@ -68,7 +68,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'Failed to create product', error: errorData }, { status: response.status })
     }
 
-    // Revalidate the products cache
     revalidateTag('products')
 
     const data = await response.json()

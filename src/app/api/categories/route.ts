@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     const response = await fetch(`${API_BASE_URL}/categories?${query.toString()}`, {
       headers,
       next: {
-        revalidate: 600, // Revalidate every 10 minutes
+        revalidate: 600,
         tags: ['categories'],
       },
     })

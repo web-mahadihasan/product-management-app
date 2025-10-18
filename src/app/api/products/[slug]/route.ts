@@ -18,7 +18,7 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
     const response = await fetch(`${API_BASE_URL}/products/${slug}`, {
       headers,
       next: {
-        revalidate: 600, // Revalidate every 10 minutes
+        revalidate: 600,
         tags: ['products', `product-${slug}`],
       },
     })
@@ -45,7 +45,6 @@ export async function PUT(request: NextRequest, { params }: { params: { slug: st
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
 
-    // First, get the product by slug to find its ID
     const productResponse = await fetch(`${API_BASE_URL}/products/${slug}`, {
       headers: {
         Authorization: token,
@@ -58,7 +57,6 @@ export async function PUT(request: NextRequest, { params }: { params: { slug: st
     const product = await productResponse.json()
     const productId = product.id
 
-    // Now, update the product using the retrieved ID
     const body = await request.json()
     const response = await fetch(`${API_BASE_URL}/products/${productId}`, {
       method: 'PUT',
@@ -74,7 +72,6 @@ export async function PUT(request: NextRequest, { params }: { params: { slug: st
       return NextResponse.json({ message: 'Failed to update product', error: errorData }, { status: response.status })
     }
 
-    // Revalidate caches
     revalidateTag('products')
     revalidateTag(`product-${slug}`)
 

@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ email }),
-      cache: 'no-store', // Do not cache auth requests
+      cache: 'no-store',
     })
 
     if (!response.ok) {

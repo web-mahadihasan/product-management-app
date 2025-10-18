@@ -16,6 +16,9 @@ export const metadata: Metadata = {
   title: "ProductHub - Product Management Dashboard",
   description: "Manage your product inventory with ease",
   generator: "v0.app",
+  icons: {
+    icon: "/favicon.svg",
+  },
 }
 
 export default function RootLayout({

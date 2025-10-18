@@ -54,7 +54,7 @@ export default function EditProductPage() {
               <Skeleton className="h-4 w-64" />
             </div>
           </div>
-          {/* Skeleton for the form */}
+          
           <div className="space-y-6">
             <Skeleton className="h-20 w-full" />
             <Skeleton className="h-32 w-full" />
