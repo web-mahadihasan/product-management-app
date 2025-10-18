@@ -1,3 +1,5 @@
+![ProductHub Preview](src/assets/readme-image.png)
+
 # ProductHub - Product Management Dashboard
 
 A modern, full-stack product management dashboard built with Next.js, TypeScript, Redux Toolkit, and Tailwind CSS.
@@ -36,20 +38,20 @@ A modern, full-stack product management dashboard built with Next.js, TypeScript
 ### Installation
 
 1. Clone the repository:
-\`\`\`bash
+```bash
 git clone <your-repo-url>
 cd product-management-dashboard
-\`\`\`
+```
 
 2. Install dependencies:
-\`\`\`bash
+```bash
 npm install
-\`\`\`
+```
 
 3. Run the development server:
-\`\`\`bash
+```bash
 npm run dev
-\`\`\`
+```
 
 4. Open [http://localhost:3000](http://localhost:3000) in your browser
 
@@ -130,11 +132,11 @@ The application uses a Backend-for-Frontend (BFF) pattern. The frontend communic
 
 ### Product Creation/Edit
 
-- **Name**: Required, 3-100 characters
-- **Description**: Required, 10-1000 characters
-- **Price**: Required, must be > 0, max 1,000,000
-- **Category**: Required, must be valid UUID
-- **Images**: Required, 1-5 valid URLs
+- **Name**: Required, 3-250 characters
+- **Description**: Required, at least 5 characters
+- **Price**: Required, must be a number greater than 0
+- **Category**: Required, must be a valid selection
+- **Images**: Required, at least 1 valid URL
 
 ### Login
 
@@ -144,9 +146,9 @@ The application uses a Backend-for-Frontend (BFF) pattern. The frontend communic
 
 This app is ready to deploy on Vercel:
 
-\`\`\`bash
+```bash
 npm run build
-\`\`\`
+```
 
 Or click the "Publish" button in v0 to deploy directly to Vercel.
 
