@@ -42,7 +42,7 @@ export function ProductBarChart({ products }: ProductBarChartProps) {
             <YAxis />
             <Tooltip />
             {/*  */}
-            <Bar dataKey="products" fill="#3b82f6" />
+            <Bar dataKey="products" fill="#74B5FB" />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

@@ -45,7 +45,7 @@ export default function EditProductPage() {
 
   if (productLoading) {
     return (
-      <div className="min-h-screen bg-background p-6">
+      <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-3xl space-y-6">
           <div className="flex items-center gap-4">
             <Skeleton className="h-10 w-10" />
@@ -54,7 +54,7 @@ export default function EditProductPage() {
               <Skeleton className="h-4 w-64" />
             </div>
           </div>
-          
+
           <div className="space-y-6">
             <Skeleton className="h-20 w-full" />
             <Skeleton className="h-32 w-full" />
@@ -74,7 +74,7 @@ export default function EditProductPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-3xl space-y-6">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => router.back()}>

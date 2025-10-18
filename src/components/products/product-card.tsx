@@ -26,7 +26,7 @@ export function ProductCard({ product, onDelete }: ProductCardProps) {
           alt={product.name}
           className="h-full w-full object-cover"
         />
-        <div className="absolute top-2 right-2 flex gap-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+        <div className="absolute top-2 right-2 flex gap-2 opacity-0 transition-opacity duration-300 group-hover:opacity-0">
           <Button
             variant="ghost"
             size="icon"
