@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter, useParams } from "next/navigation"
-import { ArrowLeft, Pencil, Trash2 } from "lucide-react"
+import { ArrowLeft, Pencil, Trash2, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -32,6 +32,7 @@ export default function ProductDetailPage() {
   const slug = params.slug as string
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   const { data: currentProduct, isLoading, isError } = useAppQuery<Product>({
     url: `/products/${slug}`,
@@ -53,14 +54,20 @@ export default function ProductDetailPage() {
     },
   })
 
+  const handlePrevImage = () => {
+    if (!currentProduct?.images?.length) return
+    setCurrentImageIndex((prevIndex) => (prevIndex === 0 ? currentProduct.images.length - 1 : prevIndex - 1))
+  }
+
+  const handleNextImage = () => {
+    if (!currentProduct?.images?.length) return
+    setCurrentImageIndex((prevIndex) => (prevIndex === currentProduct.images.length - 1 ? 0 : prevIndex + 1))
+  }
+
   const handleDelete = () => {
     if (!currentProduct) return
     deleteProduct(currentProduct.id)
   }
-
-  
-
-  
 
   if (isLoading) {
     return (
@@ -120,12 +127,32 @@ export default function ProductDetailPage() {
         <Card>
           <CardContent className="p-6">
             <div className="grid gap-6 lg:grid-cols-2">
-              <div className="aspect-square overflow-hidden rounded-lg bg-muted">
+              <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
                 <img
-                  src={currentProduct.images?.[0] || "/placeholder.svg?height=400&width=400"}
+                  src={currentProduct.images?.[currentImageIndex] || "/placeholder.svg?height=400&width=400"}
                   alt={currentProduct.name}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-cover transition-opacity duration-300"
                 />
+                {currentProduct.images && currentProduct.images.length > 1 && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-background/50 hover:bg-background/75"
+                      onClick={handlePrevImage}
+                    >
+                      <ChevronLeft className="h-6 w-6" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-background/50 hover:bg-background/75"
+                      onClick={handleNextImage}
+                    >
+                      <ChevronRight className="h-6 w-6" />
+                    </Button>
+                  </>
+                )}
               </div>
               <div className="space-y-6">
                 <div className="space-y-4">

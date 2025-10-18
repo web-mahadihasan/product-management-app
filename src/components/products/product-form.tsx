@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Trash } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -50,44 +50,60 @@ export function ProductForm({
   })
   const categories = categoriesData?.categories || []
 
-  const handleImageUpload = async (file: File) => {
-    const formData = new FormData()
-    formData.append("file", file)
-    formData.append("upload_preset", "fitVerse") // This is needed by Cloudinary
-    setUploading(true)
-    try {
-      const response = await fetch('/api/products/image-upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        toast.error(data.message || 'Failed to upload image');
-        setUploading(false);
-        return;
-      }
-
-      setFormData((prev) => ({ ...prev, images: [data.secure_url] })); // Cloudinary returns secure_url
-      setUploading(false);
-    } catch (error) {
-      console.error("Image upload error:", error)
-      setUploading(false)
-      toast.error("Failed to upload image")
+  const handleImageUpload = async (files: File[]) => {
+    if (formData.images.length + files.length > 3) {
+      toast.error("You can upload a maximum of 3 images.")
+      return
     }
+    setUploading(true)
+    const uploadPromises = files.map(async (file) => {
+      const body = new FormData()
+      body.append("file", file)
+      body.append("upload_preset", "fitVerse") // This is needed by Cloudinary
+
+      try {
+        const response = await fetch("/api/products/image-upload", {
+          method: "POST",
+          body,
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          toast.error(data.message || `Failed to upload ${file.name}`)
+          return null
+        }
+        return data.secure_url
+      } catch (error) {
+        console.error("Image upload error:", error)
+        toast.error(`Failed to upload ${file.name}`)
+        return null
+      }
+    })
+
+    const uploadedUrls = (await Promise.all(uploadPromises)).filter((url): url is string => url !== null)
+
+    setFormData((prev) => ({
+      ...prev,
+      images: [...prev.images, ...uploadedUrls],
+    }))
+    setUploadFiles([])
+    setUploading(false)
   }
 
   const onFileSelectChange = (files: FileInfo[]) => {
     setUploadFiles(files)
-    if (files.length > 0) {
-      handleImageUpload(files[0].file)
+    const filesToUpload = files.map((fi) => fi.file)
+    if (filesToUpload.length > 0) {
+      handleImageUpload(filesToUpload)
     }
   }
 
-  const onRemove = () => {
-    setUploadFiles([])
-    setFormData((prev) => ({ ...prev, images: [] }))
+  const onRemove = (imageUrl: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      images: prev.images.filter((image) => image !== imageUrl),
+    }))
   }
 
   const validate = () => {
@@ -222,33 +238,56 @@ export function ProductForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="image">
-              Image <span className="text-destructive mb-2">*</span>
+            <Label htmlFor="images">
+              Images ({`${formData.images.length}/3`}) <span className="text-destructive mb-2">*</span>
             </Label>
-            {formData.images.length > 0 ? (
-              <div className="relative mt-2 w-fit">
-                <img src={formData.images[0]} alt="Product image" width={250} height={150} className="rounded-md" />
-                <Button variant="destructive" size="icon" className="absolute top-0 right-0 h-7 w-7" onClick={onRemove}>
-                  <Trash className="h-4 w-4" />
-                </Button>
-              </div>
-            ) : (
-              <FileUpload
-                files={uploadFiles}
-                onFileSelectChange={onFileSelectChange}
-                multiple={false}
-                accept=".png,.jpg,.jpeg"
-                maxSize={10}
-                maxCount={1}
-                className="mt-2"
-                disabled={isPending || uploading}
-              >
-                <div className="space-y-4">
-                  <DropZone prompt={uploading ? "Uploading image..." : "click or drop to upload file"} />
-                  <FileError />
+            <div className="grid grid-cols-3 gap-4">
+              {formData.images.map((image, index) => (
+                <div key={image} className="relative h-32 rounded-md">
+                  <img
+                    src={image}
+                    alt={`Product image ${index + 1}`}
+                    className="h-full w-full rounded-md object-cover"
+                  />
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-1 right-1 h-6 w-6"
+                    onClick={() => onRemove(image)}
+                  >
+                    <Trash className="h-4 w-4" />
+                  </Button>
                 </div>
-              </FileUpload>
-            )}
+              ))}
+              {formData.images.length < 3 && (
+                <div
+                  className={`h-32
+                    ${formData.images.length === 0 ? "col-span-3" : ""}
+                    ${formData.images.length === 1 ? "col-span-2" : ""}
+                    ${formData.images.length === 2 ? "col-span-1" : ""}
+                  `}
+                >
+                  <FileUpload
+                    files={uploadFiles}
+                    onFileSelectChange={onFileSelectChange}
+                    multiple
+                    accept=".png,.jpg,.jpeg"
+                    maxSize={10}
+                    maxCount={3 - formData.images.length}
+                    className="h-full"
+                    disabled={isPending || uploading}
+                  >
+                    <div className="flex h-full w-full flex-col items-center justify-center space-y-4">
+                      <DropZone
+                        prompt={uploading ? "Uploading..." : "Click or drop to upload"}
+                        className="h-full w-full"
+                      />
+                      <FileError />
+                    </div>
+                  </FileUpload>
+                </div>
+              )}
+            </div>
             {errors.images && <p className="text-sm text-destructive">{errors.images}</p>}
           </div>
 
