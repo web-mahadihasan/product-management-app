@@ -17,11 +17,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { toast } from "react-hot-toast"
-import { ProductDetailSkeleton } from "@/components/products/product-skeleton"
+
 import { useAppQuery } from "@/hooks/use-app-query"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import type { Product } from "@/lib/types"
 import axiosInstance from "@/lib/axios"
+import { ProductDetailSkeleton } from "@/components/products/product-skeleton"
 
 export default function ProductDetailPage() {
   const router = useRouter()
@@ -56,17 +57,27 @@ export default function ProductDetailPage() {
     deleteProduct(currentProduct.id)
   }
 
+  
+
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background p-6">
-        <div className="mx-auto max-w-5xl">
-          <ProductDetailSkeleton />
+       <div className="min-h-screen bg-background p-6">
+          <div className="mx-auto max-w-5xl">
+            <ProductDetailSkeleton />
+          </div>
         </div>
-      </div>
-    )
+    );
   }
 
-  if (isError || !currentProduct) {
+  if (isError) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-destructive">Failed to load product.</p>
+      </div>
+    );
+  }
+
+  if (!currentProduct) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <p className="text-muted-foreground">Product not found</p>
@@ -75,9 +86,9 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-5xl space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" onClick={() => router.back()}>
               <ArrowLeft className="h-5 w-5" />
@@ -87,7 +98,7 @@ export default function ProductDetailPage() {
               <p className="text-muted-foreground">View product information</p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 mt-2 md:mt-0 md:justify-end">
             <Button
               variant="outline"
               onClick={() => router.push(`/products/${currentProduct.slug}/edit`)}

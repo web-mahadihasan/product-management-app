@@ -27,12 +27,12 @@ export function ProductTableSkeleton() {
 export function ProductDetailSkeleton() {
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Skeleton className="h-10 w-10" />
+          <Skeleton className="h-10 w-10 flex-shrink-0" />
           <div className="space-y-2">
             <Skeleton className="h-8 w-48" />
-            <Skeleton className="h-4 w-64" />
+            <Skeleton className="h-4 w-64 max-w-full" />
           </div>
         </div>
         <div className="flex gap-2">

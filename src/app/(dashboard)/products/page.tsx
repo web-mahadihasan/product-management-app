@@ -1,11 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { Plus, Search, Filter } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Pagination } from "@/components/ui/pagination"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,19 +22,46 @@ import { toast } from "react-hot-toast"
 import type { Product, Category } from "@/lib/types"
 import { ProductCard } from "@/components/products/product-card"
 import { ProductCardSkeleton } from "@/components/products/product-skeleton"
+
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import axiosInstance from "@/lib/axios"
 
 export default function ProductsPage() {
   const router = useRouter()
   const queryClient = useQueryClient()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
 
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState<string>("all")
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [productToDelete, setProductToDelete] = useState<Product | null>(null)
-  const [currentPage, setCurrentPage] = useState(1)
-  const limit = 8
+  const searchQuery = searchParams.get("search") || ""
+  const selectedCategory = searchParams.get("category") || "all"
+  const currentPage = Number(searchParams.get("page")) || 1
+  const limit = 12
+
+  const createQueryString = (params: Record<string, string | number | null>) => {
+    const newSearchParams = new URLSearchParams(searchParams?.toString())
+    for (const [key, value] of Object.entries(params)) {
+      if (value === null) {
+        newSearchParams.delete(key)
+      } else {
+        newSearchParams.set(key, String(value))
+      }
+    }
+    return newSearchParams.toString()
+  }
+
+  const onPageChange = (page: number) => {
+    router.push(`${pathname}?${createQueryString({ page })}`, { scroll: false })
+  }
+
+  const handleSearchChange = (value: string) => {
+    router.push(`${pathname}?${createQueryString({ search: value || null, page: 1 })}`, { scroll: false })
+  }
+
+  const handleCategoryChange = (value: string) => {
+    router.push(`${pathname}?${createQueryString({ category: value === 'all' ? null : value, page: 1 })}`, { scroll: false })
+  }
 
   // Fetch Categories
   const { data: categoriesData } = useAppQuery<{ categories: Category[] }>({
@@ -42,22 +70,28 @@ export default function ProductsPage() {
   })
   const categories = categoriesData?.categories || []
 
-  // Fetch Products
+  // Fetch ALL products based on filter/search
   const {
-    data: productsData,
+    data: filteredProductsData,
     isLoading: productsLoading,
     isError: productsError,
-  } = useAppQuery<{ products: Product[]; total: number }>({
+  } = useAppQuery<{ products: Product[] }>({
     url: searchQuery
       ? `/products/search?searchedText=${searchQuery}`
-      : `/products?offset=${(currentPage - 1) * limit}&limit=${limit}${
-          selectedCategory !== "all" ? `&categoryId=${selectedCategory}` : ""
-        }`,
-    queryKey: ["products", { currentPage, limit, selectedCategory, searchQuery }],
+      : selectedCategory !== "all"
+        ? `/products?categoryId=${selectedCategory}`
+        : "/products",
+    queryKey: ["products", { selectedCategory, searchQuery }], // Query depends on filters, not pagination
   })
 
-  const products = productsData?.products || []
-  const total = productsData?.total || 0
+  const allFilteredProducts = filteredProductsData?.products || []
+  const total = allFilteredProducts.length
+
+  // Client-side pagination
+  const products = allFilteredProducts.slice(
+    (currentPage - 1) * limit,
+    currentPage * limit
+  )
 
   // Delete Product Mutation
   const { mutate: deleteProduct, isPending: isDeleting } = useMutation({
@@ -83,7 +117,7 @@ export default function ProductsPage() {
   const totalPages = Math.ceil(total / limit)
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-7xl space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -104,19 +138,13 @@ export default function ProductsPage() {
             <Input
               placeholder="Search products..."
               value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value)
-                setCurrentPage(1) // Reset to first page on search
-              }}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="pl-9"
             />
           </div>
           <Select
             value={selectedCategory}
-            onValueChange={(value) => {
-              setSelectedCategory(value)
-              setCurrentPage(1) // Reset to first page on category change
-            }}
+            onValueChange={handleCategoryChange}
           >
             <SelectTrigger className="w-full sm:w-[200px]">
               <SelectValue placeholder="All Categories" />
@@ -130,10 +158,10 @@ export default function ProductsPage() {
               ))}
             </SelectContent>
           </Select>
-          <Button variant="outline" className="gap-2 bg-transparent">
+          {/* <Button variant="outline" className="gap-2 bg-transparent">
             <Filter className="h-4 w-4" />
             Filter
-          </Button>
+          </Button> */}
         </div>
 
         {/* Product Grid */}
@@ -163,36 +191,11 @@ export default function ProductsPage() {
 
         {/* Pagination */}
         {!productsLoading && products.length > 0 && (
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
-              Page {currentPage} of {totalPages}
-            </p>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setCurrentPage(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                Previous
-              </Button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <Button
-                  key={page}
-                  variant={currentPage === page ? "default" : "outline"}
-                  onClick={() => setCurrentPage(page)}
-                >
-                  {page}
-                </Button>
-              ))}
-              <Button
-                variant="outline"
-                onClick={() => setCurrentPage(currentPage + 1)}
-                disabled={currentPage >= totalPages}
-              >
-                Next
-              </Button>
-            </div>
-          </div>
+          <Pagination
+            totalPages={totalPages}
+            currentPage={currentPage}
+            onPageChange={onPageChange}
+          />
         )}
       </div>
 
