@@ -58,6 +58,7 @@ export default function CategoriesPage() {
             ))}
           </div>
         ) : (
+          categories.length === 0 ? <p className="text-red-500 mt-8 text-lg font-medium">No category found</p> : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {categories.map((category) => (
               <Link key={category.id} href={`/products?category=${category.id}`}>
@@ -77,7 +78,7 @@ export default function CategoriesPage() {
               </Link>
             ))}
           </div>
-        )}
+        ))}
       </div>
     </div>
   )
