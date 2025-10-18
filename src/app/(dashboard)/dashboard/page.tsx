@@ -73,7 +73,7 @@ export default function DashboardPage() {
             <h1 className="text-3xl font-bold tracking-tight text-foreground">Product Management</h1>
             <p className="text-muted-foreground">Manage your product inventory and details</p>
           </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
             {Array.from({ length: 4 }).map((_, index) => (
               <Card key={index}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -100,16 +100,16 @@ export default function DashboardPage() {
           <p className="text-muted-foreground">Manage your product inventory and details</p>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
           {stats.map((stat) => (
-            <Card key={stat.title} className="transition-shadow hover:shadow-md">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <Card key={stat.title} className="transition-shadow hover:shadow-md bg-[#F8f8F8] gap-3  ">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-sm font-medium text-muted-foreground">{stat.title}</CardTitle>
                 <div className={`rounded-lg p-2 ${stat.iconBg}`}>
                   <stat.icon className={`h-5 w-5 ${stat.iconColor}`} />
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-0">
                 <div className="text-2xl font-bold text-foreground">{stat.value}</div>
                 <div className="mt-1 flex items-center gap-1 text-xs">
                   {stat.trend === "up" && <TrendingUp className="h-3 w-3 text-green-600" />}

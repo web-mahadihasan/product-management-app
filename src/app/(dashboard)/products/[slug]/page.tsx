@@ -18,11 +18,12 @@ import {
 } from "@/components/ui/alert-dialog"
 import { toast } from "react-hot-toast"
 
+import { ProductDetailSkeleton } from "@/components/products/product-skeleton"
 import { useAppQuery } from "@/hooks/use-app-query"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import type { Product } from "@/lib/types"
 import axiosInstance from "@/lib/axios"
-import { ProductDetailSkeleton } from "@/components/products/product-skeleton"
+
 
 export default function ProductDetailPage() {
   const router = useRouter()
@@ -59,13 +60,15 @@ export default function ProductDetailPage() {
 
   
 
+  
+
   if (isLoading) {
     return (
-       <div className="min-h-screen bg-background p-6">
-          <div className="mx-auto max-w-5xl">
-            <ProductDetailSkeleton />
-          </div>
+      <div className="min-h-screen bg-background p-6">
+        <div className="mx-auto max-w-7xl">
+          <ProductDetailSkeleton />
         </div>
+      </div>
     );
   }
 
@@ -87,7 +90,7 @@ export default function ProductDetailPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-5xl space-y-6">
+      <div className="mx-auto max-w-7xl space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" onClick={() => router.back()}>
@@ -119,7 +122,7 @@ export default function ProductDetailPage() {
             <div className="grid gap-6 lg:grid-cols-2">
               <div className="aspect-square overflow-hidden rounded-lg bg-muted">
                 <img
-                  src={currentProduct.images[0] || "/placeholder.svg?height=400&width=400"}
+                  src={currentProduct.images?.[0] || "/placeholder.svg?height=400&width=400"}
                   alt={currentProduct.name}
                   className="h-full w-full object-cover"
                 />
