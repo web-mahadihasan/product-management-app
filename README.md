@@ -33,7 +33,7 @@ A modern, full-stack product management dashboard built with Next.js, TypeScript
 ### Prerequisites
 
 - Node.js 18+ 
-- npm or yarn
+- pnpm
 
 ### Installation
 
@@ -45,12 +45,12 @@ cd product-management-dashboard
 
 2. Install dependencies:
 ```bash
-npm install
+pnpm install
 ```
 
 3. Run the development server:
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 4. Open [http://localhost:3000](http://localhost:3000) in your browser
@@ -147,7 +147,7 @@ The application uses a Backend-for-Frontend (BFF) pattern. The frontend communic
 This app is ready to deploy on Vercel:
 
 ```bash
-npm run build
+pnpm run build
 ```
 
 Or click the "Publish" button in v0 to deploy directly to Vercel.
