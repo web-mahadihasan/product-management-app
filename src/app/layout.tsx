@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
+import { Ubuntu } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { ReduxProvider } from "@/components/providers/redux-provider"
@@ -9,8 +9,10 @@ import { ThemeProvider } from "@/components/providers/theme-provider"
 import QueryProvider from "@/components/providers/query-provider"
 import { Toaster } from 'react-hot-toast';
 
-const _geist = Geist({ subsets: ["latin"] })
-const _geistMono = Geist_Mono({ subsets: ["latin"] })
+const ubuntu = Ubuntu({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "700"],
+});
 
 export const metadata: Metadata = {
   title: "ProductHub - Product Management Dashboard",
@@ -28,7 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`font-sans antialiased`}>
+      <body className={`${ubuntu.className} font-sans antialiased`}>
         <ThemeProvider defaultTheme="light">
           <ReduxProvider>
             <QueryProvider>

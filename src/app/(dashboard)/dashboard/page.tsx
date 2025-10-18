@@ -5,6 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAppQuery } from "@/hooks/use-app-query"
 import type { Product, Category } from "@/lib/types"
 import { Skeleton } from "@/components/ui/skeleton"
+import { ProductBarChart } from "@/components/charts/product-bar-chart"
+import { TotalValueAreaChart } from "@/components/charts/total-value-area-chart"
+
+import { formatLargeNumber } from "@/lib/utils"
 
 export default function DashboardPage() {
   const { data: productsData, isLoading: productsLoading } = useAppQuery<{ products: Product[]; total: number }>({
@@ -22,7 +26,7 @@ export default function DashboardPage() {
   const categories = categoriesData?.categories || []
   const totalCategories = categories.length
   const lowStockCount = 23 // Mock data
-  const totalValue = products.reduce((sum, p) => sum + p.price, 0) / 1000
+  const totalValue = products.reduce((sum, p) => sum + p.price, 0)
 
   const isLoading = productsLoading || categoriesLoading
 
@@ -56,7 +60,7 @@ export default function DashboardPage() {
     },
     {
       title: "Total Value",
-      value: `$${totalValue.toFixed(1)}K`,
+      value: formatLargeNumber(totalValue),
       change: "+8% from last month",
       icon: DollarSign,
       iconColor: "text-green-600",
@@ -67,7 +71,7 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background p-6">
         <div className="mx-auto max-w-7xl space-y-6">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-foreground">Product Management</h1>
@@ -86,6 +90,24 @@ export default function DashboardPage() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-32" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-[300px] w-full" />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-32" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-[300px] w-full" />
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
@@ -129,6 +151,10 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           ))}
+        </div>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <ProductBarChart products={products} />
+          <TotalValueAreaChart products={products} />
         </div>
       </div>
     </div>

@@ -34,9 +34,9 @@ export function ProductCard({ product, onDelete }: ProductCardProps) {
               e.stopPropagation()
               router.push(`/products/${product.slug}/edit`)
             }}
-            className="h-8 w-8 bg-white/80 hover:bg-white"
+            className="h-8 w-8 bg-black/80 hover:bg-white"
           >
-            <Pencil className="h-4 w-4" />
+            <Pencil className="h-4 w-4 text-white hover:text-black" />
           </Button>
           <Button
             variant="ghost"
@@ -57,9 +57,29 @@ export function ProductCard({ product, onDelete }: ProductCardProps) {
           <span className="text-muted-foreground">Category</span>
           <Badge variant="secondary">{product.category.name}</Badge>
         </div>
-        <div className="flex items-center justify-between text-sm">
+        <div className="flex items-center justify-between text-sm mt-1">
           <span className="text-muted-foreground">Price</span>
           <span className="font-semibold">${product.price.toFixed(2)}</span>
+        </div>
+        <div className="flex items-center gap-4 mt-2 *:flex-1">
+          <Button size="sm" className="gap-2 h-auto py-1 bg-black/60 hover:bg-black/90"
+            onClick={(e) => {
+              e.stopPropagation()
+              router.push(`/products/${product.slug}/edit`)
+            }}
+            >
+            <Pencil className="h-2 w-2 text-white" />
+            Edit
+          </Button>
+          <Button size="sm" className="gap-2 h-auto py-1 bg-[#EBEBEB] text-destructive hover:bg-[#F8F8F8]"
+            onClick={(e) => {
+              e.stopPropagation()
+              onDelete(product)
+            }}
+            >
+            <Trash2 className="h-2 w-2 text-destructive" />
+            Delete
+          </Button>
         </div>
       </CardContent>
     </Card>
