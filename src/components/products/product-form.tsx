@@ -53,16 +53,24 @@ export function ProductForm({
   const handleImageUpload = async (file: File) => {
     const formData = new FormData()
     formData.append("file", file)
-    formData.append("upload_preset", "fitVerse") // Replace with your upload preset
+    formData.append("upload_preset", "fitVerse") // This is needed by Cloudinary
     setUploading(true)
     try {
-      const response = await fetch(`https://api.cloudinary.com/v1_1/dcnpqmlqd/image/upload`, { // Replace with your cloud name
-        method: "POST",
+      const response = await fetch('/api/products/image-upload', {
+        method: 'POST',
         body: formData,
-      })
-      const data = await response.json()
-      setFormData((prev) => ({ ...prev, images: [data.url] }))
-      setUploading(false)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast.error(data.message || 'Failed to upload image');
+        setUploading(false);
+        return;
+      }
+
+      setFormData((prev) => ({ ...prev, images: [data.secure_url] })); // Cloudinary returns secure_url
+      setUploading(false);
     } catch (error) {
       console.error("Image upload error:", error)
       setUploading(false)
@@ -246,7 +254,13 @@ export function ProductForm({
 
           <div className="flex gap-4">
             <Button type="submit" disabled={isPending || uploading} className="flex-1">
-              {isPending ? `${submitButtonText}...` : submitButtonText}
+              {uploading
+                ? "Uploading Image..."
+                : isPending
+                  ? initialData
+                    ? "Updating Product..."
+                    : "Creating Product..."
+                  : submitButtonText}
             </Button>
           </div>
         </form>

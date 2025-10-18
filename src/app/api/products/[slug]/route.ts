@@ -6,7 +6,7 @@ const API_BASE_URL = process.env.API_BASE_URL
 
 // GET a single product by slug
 export async function GET(request: NextRequest, { params }: { params: { slug: string } }) {
-  const { slug } = params
+  const { slug } = await params
   const token = request.headers.get('authorization')
 
   const headers: HeadersInit = {}
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
 
 // PUT (update) a product
 export async function PUT(request: NextRequest, { params }: { params: { slug: string } }) {
-  const { slug } = params
+  const { slug } = await params
 
   try {
     const token = request.headers.get('authorization')
@@ -87,7 +87,7 @@ export async function PUT(request: NextRequest, { params }: { params: { slug: st
 
 // DELETE a product
 export async function DELETE(request: NextRequest, { params }: { params: { slug: string } }) {
-  const { slug: productId } = params // The slug is the product ID in this context
+  const { slug: productId } = await params // The slug is the product ID in this context
 
   try {
     const token = request.headers.get('authorization')

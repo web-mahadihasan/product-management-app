@@ -103,9 +103,9 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Card>
-            <CardContent className="p-6">
+        <Card>
+          <CardContent className="p-6">
+            <div className="grid gap-6 lg:grid-cols-2">
               <div className="aspect-square overflow-hidden rounded-lg bg-muted">
                 <img
                   src={currentProduct.images[0] || "/placeholder.svg?height=400&width=400"}
@@ -113,50 +113,47 @@ export default function ProductDetailPage() {
                   className="h-full w-full object-cover"
                 />
               </div>
-            </CardContent>
-          </Card>
-
-          <div className="space-y-6">
-            <Card>
-              <CardContent className="p-6 space-y-4">
-                <div>
-                  <h2 className="text-2xl font-bold text-foreground">{currentProduct.name}</h2>
-                  <Badge variant="secondary" className="mt-2">
-                    {currentProduct.category.name}
-                  </Badge>
-                </div>
-
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Description</p>
-                  <p className="mt-1 text-foreground">{currentProduct.description}</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-6">
+                <div className="space-y-4">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Price</p>
-                    <p className="mt-1 text-2xl font-bold text-foreground">${currentProduct.price.toFixed(2)}</p>
+                    <h2 className="text-2xl font-bold text-foreground">{currentProduct.name}</h2>
+                    <Badge variant="secondary" className="mt-2">
+                      {currentProduct.category.name}
+                    </Badge>
                   </div>
+
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Stock</p>
-                    <p className="mt-1 text-2xl font-bold text-foreground">{Math.floor(Math.random() * 100)}</p>
+                    <p className="text-sm font-medium text-muted-foreground">Description</p>
+                    <p className="mt-1 text-foreground">{currentProduct.description}</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Price</p>
+                      <p className="mt-1 text-2xl font-bold text-foreground">${currentProduct.price.toFixed(2)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Stock</p>
+                      <p className="mt-1 text-2xl font-bold text-foreground">{Math.floor(Math.random() * 100)}</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Product ID</p>
+                    <p className="mt-1 font-mono text-sm text-foreground">{currentProduct.id}</p>
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Created At</p>
+                    <p className="mt-1 text-sm text-foreground">
+                      {new Date(currentProduct.createdAt).toLocaleDateString()}
+                    </p>
                   </div>
                 </div>
-
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Product ID</p>
-                  <p className="mt-1 font-mono text-sm text-foreground">{currentProduct.id}</p>
-                </div>
-
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Created At</p>
-                  <p className="mt-1 text-sm text-foreground">
-                    {new Date(currentProduct.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
