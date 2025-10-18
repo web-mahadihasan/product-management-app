@@ -95,6 +95,8 @@ export default function ProductDetailPage() {
     )
   }
 
+  console.log("current product", currentProduct)
+
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-7xl space-y-6">
