@@ -41,8 +41,8 @@ export function ProductBarChart({ products }: ProductBarChartProps) {
             />
             <YAxis />
             <Tooltip />
-            {/* <Legend /> */}
-            <Bar dataKey="products" fill="#8884d8" />
+            {/*  */}
+            <Bar dataKey="products" fill="#3b82f6" />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

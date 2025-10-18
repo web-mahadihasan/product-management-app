@@ -37,8 +37,8 @@ export function TotalValueAreaChart({ products }: TotalValueAreaChartProps) {
           <AreaChart data={data}>
             <defs>
               <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
-                <stop offset="95%" stopColor="#8884d8" stopOpacity={0}/>
+                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4}/>
+                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" />
@@ -49,7 +49,7 @@ export function TotalValueAreaChart({ products }: TotalValueAreaChartProps) {
             />
             <YAxis tickFormatter={(value: number) => formatLargeNumber(value)} />
             <Tooltip formatter={(value: number) => formatLargeNumber(value)} />
-            <Area type="monotone" dataKey="value" stroke="#8884d8" fillOpacity={1} fill="url(#colorValue)" />
+            <Area type="monotone" dataKey="value" stroke="#3b82f6" fillOpacity={1} fill="url(#colorValue)" />
           </AreaChart>
         </ResponsiveContainer>
       </CardContent>

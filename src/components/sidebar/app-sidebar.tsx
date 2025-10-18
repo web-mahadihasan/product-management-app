@@ -29,7 +29,7 @@ interface AppSidebarProps {
 const SidebarBody = ({ collapsed, setCollapsed, setMobileSidebarOpen, handleLogout, pathname }: any) => (
   <div className="flex h-full flex-col relative">
     {/* Header */}
-    <div className="flex h-16 items-center justify-between border-b px-4">
+    <div className="flex h-14 items-center justify-between border-b px-4">
       <Link href="/dashboard" className="flex items-center gap-2 overflow-hidden">
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary">
           <Package className="h-5 w-5 text-primary-foreground" />
@@ -47,7 +47,7 @@ const SidebarBody = ({ collapsed, setCollapsed, setMobileSidebarOpen, handleLogo
     </div>
 
     {/* Navigation */}
-    <nav className="flex-1 space-y-2 p-2">
+    <nav className="flex-1 space-y-2 p-2 mt-4">
       {navigation.map((item) => {
         const isActive = item.href === "/products" ? pathname.startsWith("/products") && !pathname.startsWith("/products/create") : pathname === item.href || pathname.startsWith(item.href + "/")
         return (
