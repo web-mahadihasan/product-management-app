@@ -1,10 +1,13 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAppQuery } from "@/hooks/use-app-query"
 import type { Category } from "@/lib/types"
+import { Input } from "@/components/ui/input"
+import { Search } from "lucide-react"
 
 function CategorySkeleton() {
   return (
@@ -21,19 +24,31 @@ function CategorySkeleton() {
 }
 
 export default function CategoriesPage() {
+  const [searchQuery, setSearchQuery] = useState("")
+
   const { data: categoriesData, isLoading } = useAppQuery<{ categories: Category[] }>({
-    url: "/categories",
-    queryKey: ["categories"],
+    url: searchQuery ? `/categories/search?searchedText=${searchQuery}` : "/categories",
+    queryKey: ["categories", searchQuery],
   })
 
   const categories = categoriesData?.categories || []
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background p-6">
       <div className="mx-auto max-w-7xl space-y-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Categories</h1>
           <p className="text-muted-foreground">Browse product categories</p>
+        </div>
+
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search categories..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9 focus-visible:ring-0 focus-visible:ring-offset-0"
+          />
         </div>
 
         {isLoading ? (
@@ -51,7 +66,7 @@ export default function CategoriesPage() {
                     <img
                       src={category.image || "/placeholder.svg?height=200&width=300"}
                       alt={category.name}
-                      className="h-full w-full object-oover"
+                      className="h-full w-full object-cover"
                     />
                   </div>
                   <CardContent className="p-4">

@@ -5,7 +5,7 @@ import { useIsLargeScreen } from "@/hooks/use-is-large-screen"
 import { useAppDispatch } from "@/lib/store/hooks"
 import { logout } from "@/lib/store/slices/auth-slice"
 import { cn } from "@/lib/utils"
-import { LayoutDashboard, LogOut, Package, PlusCircle, Settings, Tag } from "lucide-react"
+import { LayoutDashboard, LogOut, Package, PlusCircle, User, Tag } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { HiArrowLeftStartOnRectangle, HiArrowRightStartOnRectangle } from "react-icons/hi2"
@@ -16,7 +16,7 @@ const navigation = [
   { name: "Products", href: "/products", icon: Package },
   { name: "Categories", href: "/categories", icon: Tag },
   { name: "Create", href: "/products/create", icon: PlusCircle },
-  { name: "Settings", href: "/settings", icon: Settings },
+  { name: "Profile", href: "/profile", icon: User },
 ]
 
 interface AppSidebarProps {
